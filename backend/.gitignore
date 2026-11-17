@@ -1,0 +1,62 @@
+# Backend (Go) .gitignore
+# =======================
+
+# Binaries and build artifacts
+/api
+/worker
+/seed
+/migrate
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test output
+*.test
+*.out
+coverage.out
+coverage.html
+
+# Dependency directories (use go mod vendor if needed)
+vendor/
+
+# Go workspace
+go.work
+
+# Environment files (keep .env.example)
+.env
+.env.local
+
+# IDE/Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Editor backup files
+*.bak
+*.orig
+
+# IDE project files
+*.iml
+*.ipr
+*.iws
+
+# Local certificates
+*.pem
+*.key
+*.crt
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+temp/

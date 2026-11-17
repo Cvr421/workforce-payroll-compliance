@@ -1,0 +1,4 @@
+DROP TABLE IF EXISTS establishments;
+DROP TABLE IF EXISTS organizations;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS tenants;

@@ -1,0 +1,80 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: complylite
+      POSTGRES_USER: complylite
+      POSTGRES_PASSWORD: complylite
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U complylite -d complylite"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      DATABASE_URL: postgres://complylite:complylite@postgres:5432/complylite?sslmode=disable
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: dev-secret-change-in-production-at-least-32-bytes-long
+      JWT_ISSUER: complylite
+      JWT_AUDIENCE: complylite-api
+      PORT: "8080"
+      LOG_LEVEL: debug
+      CORS_ALLOWED_ORIGINS: http://localhost:5173
+      STORAGE_DIR: /tmp/complylite-storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: ["/worker"]
+    environment:
+      DATABASE_URL: postgres://complylite:complylite@postgres:5432/complylite?sslmode=disable
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: dev-secret-change-in-production-at-least-32-bytes-long
+      JWT_ISSUER: complylite
+      JWT_AUDIENCE: complylite-api
+      PORT: "8080"
+      LOG_LEVEL: debug
+      WORKER_CONCURRENCY: "4"
+      WORKER_POLL_INTERVAL: "2s"
+      JOB_STALE_AFTER: "5m"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+
+volumes:
+  postgres_data:
+  redis_data:
